@@ -2,6 +2,7 @@ package com.yama.ui.screen.home.ui
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -23,16 +24,25 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
+import androidx.compose.material.TextButton
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldColors
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,15 +51,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.yama.R
-import com.yama.ui.screen.home.repo.RepositorioDeTesteo
-import com.yama.ui.screen.home.repo.TitlesTest
+import com.yama.domain.Media
 import com.yama.ui.screen.home.viewmodel.HomeViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-
-
-val listTest = RepositorioDeTesteo.titlesTest
 
 
 @Composable
@@ -59,9 +66,16 @@ fun ContentView(homeViewModel: HomeViewModel, context: Context) {
     val scaffoldState = rememberScaffoldState()
     val navigationItems = listOf(DrawerLocation.Settings, DrawerLocation.About)
 
+
     Scaffold(
         scaffoldState = scaffoldState,
-        topBar = { ScaffoldTopBar(scaffoldState = scaffoldState, scope = scope) },
+        topBar = {
+            ScaffoldTopBar(
+                scaffoldState = scaffoldState,
+                scope = scope,
+                homeViewModel = homeViewModel
+            )
+        },
         drawerContent = { ScaffoldDrawer(menuItems = navigationItems) },
         backgroundColor = MaterialTheme.colorScheme.background,
         drawerBackgroundColor = MaterialTheme.colorScheme.background
@@ -119,9 +133,11 @@ fun ScaffoldDrawer(menuItems: List<DrawerLocation>) {
             ScaffoldDrawerItem(menuItems = item)
         }
 
-        Spacer(modifier = Modifier
-            .height(340.dp)
-            .fillMaxWidth())
+        Spacer(
+            modifier = Modifier
+                .height(320.dp)
+                .fillMaxWidth()
+        )
 
         Text(
             text = "yama version $textVersion",
@@ -141,34 +157,40 @@ fun ScaffoldDrawerItem(menuItems: DrawerLocation) {
     Row(
         Modifier
             .fillMaxWidth()
-            .height(56.dp)
-            .padding(6.dp)
+            .height(60.dp)
+            .padding(5.dp)
             .clip(RoundedCornerShape(12))
     ) {
-        Icon(
-            imageVector = menuItems.icon,
-            contentDescription = "${menuItems.icon} icon",
-            tint = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.size(30.dp)
-        )
+        TextButton(onClick = { /*TODO*/ }) {
 
-        Spacer(modifier = Modifier.width(13.dp))
+            Icon(
+                imageVector = menuItems.icon,
+                contentDescription = "${menuItems.icon} icon",
+                tint = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.size(30.dp)
+            )
 
-        Text(
-            text = menuItems.title,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth()
-        )
+            Spacer(modifier = Modifier.width(13.dp))
 
+            Text(
+                text = menuItems.title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 
 }
 
 @Composable
-fun ScaffoldTopBar(scaffoldState: ScaffoldState, scope: CoroutineScope) {
+fun ScaffoldTopBar(
+    scaffoldState: ScaffoldState,
+    scope: CoroutineScope,
+    homeViewModel: HomeViewModel
+) {
 
     TopAppBar(
         title = {
@@ -196,6 +218,24 @@ fun ScaffoldTopBar(scaffoldState: ScaffoldState, scope: CoroutineScope) {
                 )
             }
         },
+        actions = {
+            IconButton(onClick = {
+                /*Lógica de search bar*/
+                scope.launch {
+                    homeViewModel.isClicked()
+                }
+
+            }) {
+                Icon(
+                    imageVector = Icons.Filled.Search,
+                    contentDescription = "Search Icon",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(35.dp)
+                )
+            }
+            ScaffoldSearchBar(homeViewModel = homeViewModel)
+        },
+        elevation = 0.dp,
         backgroundColor = MaterialTheme.colorScheme.background
     )
 }
@@ -218,18 +258,22 @@ private fun CenterTitlesBox(homeViewModel: HomeViewModel) {
 
 @Composable
 private fun RecyclerViewTitles(homeViewModel: HomeViewModel) {
+
+    val media by homeViewModel.media.collectAsState()
+    val isSearching by homeViewModel.isSearching.collectAsState()
+
     LazyColumn(
         Modifier
             .padding(5.dp)
     ) {
-        items(listTest) { item ->
+        items(media) { item ->
             ItemTitle(item = item)
         }
     }
 }
 
 @Composable
-private fun ItemTitle(item: TitlesTest) {
+private fun ItemTitle(item: Media) {
 
     Box(
         modifier = Modifier
@@ -243,11 +287,11 @@ private fun ItemTitle(item: TitlesTest) {
             )
             .clickable {
                 /*Navegación a otra pantalla*/
-                Log.d("Home_TAG", "Tocaste ${item.name}")
+                Log.d("Home_TAG", "Tocaste ${item.title}")
             }
     ) {
         Image(
-            painter = painterResource(id = item.thumbnail),
+            painter = painterResource(id = item.thumbnail.toInt()),
             contentDescription = "title image",
             modifier = Modifier
                 .align(alignment = Alignment.Center)
@@ -263,7 +307,7 @@ private fun ItemTitle(item: TitlesTest) {
                 .padding(vertical = 8.dp, horizontal = 15.dp)
         ) {
             Text(
-                text = item.name,
+                text = item.title,
                 style = MaterialTheme.typography.bodyLarge,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -271,4 +315,44 @@ private fun ItemTitle(item: TitlesTest) {
             )
         }
     }
+}
+
+@Composable
+fun ScaffoldSearchBar(homeViewModel: HomeViewModel) {
+
+    val searchText by homeViewModel.searchText.collectAsState()
+    val isClicked by homeViewModel.isClicked.collectAsState()
+
+
+    AnimatedVisibility(visible = isClicked) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+                .safeContentPadding()
+        ) {
+
+            TextField(
+                value = searchText,
+                onValueChange = homeViewModel::onSearchTextChange,
+                placeholder = {
+                    Text(
+                        text = "Search title...",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.background,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                shape = RoundedCornerShape(12),
+                singleLine = true,
+                colors = androidx.compose.material.TextFieldDefaults.textFieldColors(
+                    backgroundColor = MaterialTheme.colorScheme.onBackground,
+                    focusedIndicatorColor = MaterialTheme.colorScheme.primary
+                )
+            )
+        }
+    }
+
+
 }
