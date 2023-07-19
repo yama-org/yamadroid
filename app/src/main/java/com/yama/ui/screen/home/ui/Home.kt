@@ -3,6 +3,10 @@ package com.yama.ui.screen.home.ui
 import android.content.Context
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -50,6 +54,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.yama.R
@@ -192,15 +197,19 @@ fun ScaffoldTopBar(
     homeViewModel: HomeViewModel
 ) {
 
+    val isClicked by homeViewModel.isClicked.collectAsState()
+
     TopAppBar(
         title = {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                text = "Titles",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
+            AnimatedVisibility(visible = !isClicked, enter = fadeIn(), exit = fadeOut()) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    text = "Titles",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
         },
         navigationIcon = {
             IconButton(
@@ -324,7 +333,11 @@ fun ScaffoldSearchBar(homeViewModel: HomeViewModel) {
     val isClicked by homeViewModel.isClicked.collectAsState()
 
 
-    AnimatedVisibility(visible = isClicked) {
+    AnimatedVisibility(
+        visible = isClicked,
+        enter = fadeIn() + slideInHorizontally(initialOffsetX = { it }),
+        exit = fadeOut() + slideOutHorizontally(targetOffsetX = { it })
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
