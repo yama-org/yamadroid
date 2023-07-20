@@ -12,10 +12,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -30,20 +32,17 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldColors
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -54,9 +53,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.yama.R
 import com.yama.domain.Media
 import com.yama.ui.screen.home.viewmodel.HomeViewModel
@@ -70,16 +67,22 @@ fun ContentView(homeViewModel: HomeViewModel, context: Context) {
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
     val navigationItems = listOf(DrawerLocation.Settings, DrawerLocation.About)
-
+    val isClicked by homeViewModel.isClicked.collectAsState()
 
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-            ScaffoldTopBar(
-                scaffoldState = scaffoldState,
-                scope = scope,
-                homeViewModel = homeViewModel
-            )
+            AnimatedVisibility(
+                visible = !isClicked,
+                enter = fadeIn() + slideInHorizontally(),
+                exit = fadeOut() + slideOutHorizontally()
+            ) {
+                ScaffoldTopBar(
+                    scaffoldState = scaffoldState,
+                    scope = scope,
+                    homeViewModel = homeViewModel
+                )
+            }
         },
         drawerContent = { ScaffoldDrawer(menuItems = navigationItems) },
         backgroundColor = MaterialTheme.colorScheme.background,
@@ -89,9 +92,10 @@ fun ContentView(homeViewModel: HomeViewModel, context: Context) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
+                .padding(start = 2.5.dp, end = 2.5.dp, top = 10.dp, bottom = 2.dp)
         ) {
-            Column {
-                Spacer(modifier = Modifier.padding(vertical = 1.dp))
+            Column() {
+                ScaffoldSearchBar(homeViewModel = homeViewModel)
                 CenterTitlesBox(homeViewModel)
             }
         }
@@ -197,19 +201,15 @@ fun ScaffoldTopBar(
     homeViewModel: HomeViewModel
 ) {
 
-    val isClicked by homeViewModel.isClicked.collectAsState()
-
     TopAppBar(
+        modifier = Modifier.padding(start = 5.dp, end = 5.dp),
         title = {
-            AnimatedVisibility(visible = !isClicked, enter = fadeIn(), exit = fadeOut()) {
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    text = "Titles",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            }
+            Text(
+                text = "Titles",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+
         },
         navigationIcon = {
             IconButton(
@@ -226,10 +226,11 @@ fun ScaffoldTopBar(
                     modifier = Modifier.size(35.dp)
                 )
             }
+
+
         },
         actions = {
             IconButton(onClick = {
-                /*Lógica de search bar*/
                 scope.launch {
                     homeViewModel.isClicked()
                 }
@@ -241,8 +242,8 @@ fun ScaffoldTopBar(
                     tint = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(35.dp)
                 )
+
             }
-            ScaffoldSearchBar(homeViewModel = homeViewModel)
         },
         elevation = 0.dp,
         backgroundColor = MaterialTheme.colorScheme.background
@@ -254,11 +255,12 @@ fun ScaffoldTopBar(
 private fun CenterTitlesBox(homeViewModel: HomeViewModel) {
     Column(
         Modifier
-            .padding(10.dp)
+            .padding(start = 5.dp, end = 5.dp, top = 5.dp, bottom = 10.dp)
             .border(
                 border = BorderStroke(3.dp, MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(10.dp)
-            )
+            ),
+        verticalArrangement = Arrangement.Center
     ) {
         RecyclerViewTitles(homeViewModel)
     }
@@ -274,6 +276,7 @@ private fun RecyclerViewTitles(homeViewModel: HomeViewModel) {
     LazyColumn(
         Modifier
             .padding(5.dp)
+            .fillMaxHeight()
     ) {
         items(media) { item ->
             ItemTitle(item = item)
@@ -340,10 +343,18 @@ fun ScaffoldSearchBar(homeViewModel: HomeViewModel) {
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-                .safeContentPadding()
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
         ) {
+
+            IconButton(onClick = { homeViewModel.isClicked() }) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = "Back Icon",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(35.dp)
+                )
+            }
 
             TextField(
                 value = searchText,
@@ -362,7 +373,10 @@ fun ScaffoldSearchBar(homeViewModel: HomeViewModel) {
                 colors = androidx.compose.material.TextFieldDefaults.textFieldColors(
                     backgroundColor = MaterialTheme.colorScheme.onBackground,
                     focusedIndicatorColor = MaterialTheme.colorScheme.primary
-                )
+                ),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 15.dp)
             )
         }
     }
