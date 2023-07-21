@@ -30,7 +30,6 @@ class MainViewModel @Inject constructor() : ViewModel() {
     private val _anime = MutableStateFlow(listOf<Anime>())
 
     private val _episodes = MutableStateFlow(listOf<Episode>())
-    val episodes = _episodes
 
     var screenUbication by mutableStateOf("Titles")
 
@@ -54,6 +53,24 @@ class MainViewModel @Inject constructor() : ViewModel() {
             scope = viewModelScope,
             SharingStarted.WhileSubscribed(5000),
             _anime.value
+        )
+
+    @OptIn(FlowPreview::class)
+    val episode = searchText
+        .debounce(500L)
+        .combine(_episodes) { text, episode ->
+
+            if (text.isBlank()) {
+                episode
+            } else {
+                episode.filter {
+                    it.doesMatchSearchQuery(text)
+                }
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            _episodes.value
         )
 
     private val _isClicked = MutableStateFlow(false)

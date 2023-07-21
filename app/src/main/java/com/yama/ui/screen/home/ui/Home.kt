@@ -111,7 +111,7 @@ fun CenterTitlesBox(mainViewModel: MainViewModel, navController: NavController) 
 @Composable
 private fun RecyclerViewTitles(mainViewModel: MainViewModel, navController: NavController) {
 
-    val media by mainViewModel.anime.collectAsState()
+    val anime by mainViewModel.anime.collectAsState()
     val isSearching by mainViewModel.isSearching.collectAsState()
 
     LazyColumn(
@@ -119,7 +119,7 @@ private fun RecyclerViewTitles(mainViewModel: MainViewModel, navController: NavC
             .padding(5.dp)
             .fillMaxHeight()
     ) {
-        items(media) { item ->
+        items(anime) { item ->
             ItemTitle(item = item, navController = navController, mainViewModel = mainViewModel)
         }
     }
