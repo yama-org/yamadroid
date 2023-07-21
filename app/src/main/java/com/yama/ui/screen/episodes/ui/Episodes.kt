@@ -29,8 +29,11 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.BottomAppBarDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -53,12 +56,14 @@ import com.yama.navigation.YamaScreens
 import com.yama.ui.scaffold.ScaffoldBottomBar
 import com.yama.ui.scaffold.ScaffoldDrawer
 import com.yama.ui.scaffold.ScaffoldSearchBar
+import com.yama.ui.scaffold.ScaffoldSearchTopBar
 import com.yama.ui.scaffold.ScaffoldTopBar
 import com.yama.ui.screen.home.ui.DrawerLocation
 import com.yama.ui.screen.viewmodel.MainViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EpisodesContentView(
     context: Context,
@@ -71,6 +76,7 @@ fun EpisodesContentView(
     val navigationItems = listOf(DrawerLocation.Settings, DrawerLocation.About)
     val isClicked by mainViewModel.isClicked.collectAsState()
     val isPressed by mainViewModel.isPressed.collectAsState()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -81,6 +87,17 @@ fun EpisodesContentView(
                 exit = fadeOut() + slideOutHorizontally()
             ) {
                 ScaffoldTopBar(
+                    scaffoldState = scaffoldState,
+                    scope = scope,
+                    mainViewModel = mainViewModel,
+                    navController = navController
+                )
+            }
+            AnimatedVisibility(visible = isClicked,
+                enter = fadeIn() + slideInHorizontally(initialOffsetX = { it }),
+                exit = fadeOut() + slideOutHorizontally(targetOffsetX = { it })
+            ) {
+                ScaffoldSearchTopBar(
                     scaffoldState = scaffoldState,
                     scope = scope,
                     mainViewModel = mainViewModel,
@@ -107,7 +124,7 @@ fun EpisodesContentView(
                 .padding(start = 2.5.dp, end = 2.5.dp, top = 10.dp, bottom = 2.dp)
         ) {
             Column {
-                ScaffoldSearchBar(mainViewModel = mainViewModel)
+                //ScaffoldSearchBar(mainViewModel = mainViewModel)
                 CenterEpisodesBox(
                     mainViewModel = mainViewModel,
                     navController = navController,

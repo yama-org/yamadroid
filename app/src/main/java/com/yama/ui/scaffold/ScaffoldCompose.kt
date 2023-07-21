@@ -1,14 +1,8 @@
 package com.yama.ui.scaffold
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.TextButton
@@ -31,18 +26,20 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.modifier.modifierLocalProvider
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -169,6 +166,41 @@ fun ScaffoldTopBar(
     )
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScaffoldSearchTopBar(
+    scaffoldState: ScaffoldState,
+    scope: CoroutineScope,
+    mainViewModel: MainViewModel,
+    navController: NavController
+) {
+
+    val searchText by mainViewModel.searchText.collectAsState()
+
+    CenterAlignedTopAppBar(
+        title = { },
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(MaterialTheme.colorScheme.background),
+        navigationIcon = {
+            IconButton(
+                onClick = {
+                    scope.launch {
+                        mainViewModel.isClicked()
+                    }
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = "Back icon",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(35.dp)
+                )
+            }
+        },
+        actions = { ScaffoldSearchBar(mainViewModel = mainViewModel) })
+
+}
+
 @Composable
 fun ScaffoldSearchBar(mainViewModel: MainViewModel) {
 
@@ -176,49 +208,34 @@ fun ScaffoldSearchBar(mainViewModel: MainViewModel) {
     val isClicked by mainViewModel.isClicked.collectAsState()
 
 
-    AnimatedVisibility(
-        visible = isClicked,
-        enter = fadeIn() + slideInHorizontally(initialOffsetX = { it }),
-        exit = fadeOut() + slideOutHorizontally(targetOffsetX = { it })
+    Row(
+        modifier = Modifier
+            .width(300.dp),
+        horizontalArrangement = Arrangement.Center
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
 
-            IconButton(onClick = { mainViewModel.isClicked() }) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = "Back Icon",
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(35.dp)
+        TextField(
+            value = searchText,
+            onValueChange = mainViewModel::onSearchTextChange,
+            placeholder = {
+                Text(
+                    text = "Search title...",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.background,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-            }
-
-            TextField(
-                value = searchText,
-                onValueChange = mainViewModel::onSearchTextChange,
-                placeholder = {
-                    Text(
-                        text = "Search title...",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.background,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                shape = RoundedCornerShape(12),
-                singleLine = true,
-                colors = TextFieldDefaults.textFieldColors(
-                    backgroundColor = MaterialTheme.colorScheme.onBackground,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary
-                ),
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 15.dp)
-            )
-        }
+            },
+            shape = RoundedCornerShape(12),
+            singleLine = true,
+            colors = TextFieldDefaults.textFieldColors(
+                backgroundColor = MaterialTheme.colorScheme.onBackground,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary
+            ),
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 15.dp)
+        )
     }
 }
 
@@ -226,39 +243,46 @@ fun ScaffoldSearchBar(mainViewModel: MainViewModel) {
 fun ScaffoldBottomBar(mainViewModel: MainViewModel) {
 
     BottomAppBar(
-        modifier = Modifier.padding(horizontal = 10.dp),
-        containerColor = MaterialTheme.colorScheme.background,
-        tonalElevation = (-5).dp,
+        modifier = Modifier
+            .clip(RoundedCornerShape(20)),
+        containerColor = MaterialTheme.colorScheme.tertiary,
+        tonalElevation = 50.dp,
         contentColor = MaterialTheme.colorScheme.onBackground,
         actions = {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                IconButton(onClick = { /*TODO*/ }) {
+                IconButton(
+                    modifier = Modifier
+                        .size(60.dp)
+                        .clip(CircleShape),
+                    onClick = { /*TODO*/ }
+                ) {
                     Icon(
                         imageVector = Icons.Filled.Refresh,
                         contentDescription = "Refresh icon",
                         tint = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.size(400.dp)
+                        modifier = Modifier.size(80.dp),
                     )
                 }
 
-                IconButton(onClick = { /*TODO*/ }) {
+                IconButton(modifier = Modifier.size(60.dp), onClick = { /*TODO*/ }) {
                     Icon(
                         imageVector = Icons.Filled.CheckCircle,
                         contentDescription = "Check icon",
                         tint = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.size(400.dp)
+                        modifier = Modifier.size(80.dp),
                     )
                 }
 
-                IconButton(onClick = { /*TODO*/ }) {
+                IconButton(modifier = Modifier.size(60.dp), onClick = { /*TODO*/ }) {
                     Icon(
                         imageVector = Icons.Filled.Checklist,
                         contentDescription = "CheckList icon",
                         tint = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.size(400.dp)
+                        modifier = Modifier.size(80.dp),
                     )
                 }
             }
