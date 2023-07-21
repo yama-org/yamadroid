@@ -76,6 +76,9 @@ class MainViewModel @Inject constructor() : ViewModel() {
     private val _isClicked = MutableStateFlow(false)
     val isClicked = _isClicked.asStateFlow()
 
+    private val _isPressed = MutableStateFlow(false)
+    val isPressed = _isPressed.asStateFlow()
+
     init {
         _anime.value = animeTests
     }
@@ -86,6 +89,14 @@ class MainViewModel @Inject constructor() : ViewModel() {
 
     fun isClicked() {
         _isClicked.value = !_isClicked.value
+    }
+
+    fun isPressed() {
+        _isPressed.value = !_isPressed.value
+    }
+
+    fun isNotPressed() {
+        _isPressed.value = false
     }
 
     fun animeSelected(anime: Anime) {

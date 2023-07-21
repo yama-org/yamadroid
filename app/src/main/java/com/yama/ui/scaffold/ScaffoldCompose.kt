@@ -8,6 +8,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,8 +24,13 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.modifier.modifierLocalProvider
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -90,6 +97,7 @@ fun ScaffoldTopBar(
                     IconButton(
                         onClick = {
                             scope.launch {
+                                mainViewModel.isNotPressed()
                                 navController.navigate(YamaScreens.Home.route)
                             }
                         }
@@ -106,20 +114,55 @@ fun ScaffoldTopBar(
 
         },
         actions = {
-            IconButton(onClick = {
-                scope.launch {
-                    mainViewModel.isClicked()
+            when (mainViewModel.screenUbication) {
+
+                "Titles" -> {
+                    IconButton(onClick = {
+                        scope.launch {
+                            mainViewModel.isClicked()
+                        }
+
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = "Search Icon",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(35.dp)
+                        )
+                    }
                 }
 
-            }) {
-                Icon(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = "Search Icon",
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(35.dp)
-                )
+                "Episodes" -> {
+
+                    IconButton(onClick = { /*Navegacion a informacion de la serie*/ }) {
+                        Icon(
+                            imageVector = Icons.Filled.Info,
+                            contentDescription = "Info Icon",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(35.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.padding(horizontal = 2.dp))
+
+                    IconButton(onClick = {
+                        scope.launch {
+                            mainViewModel.isClicked()
+                        }
+
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = "Search Icon",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(35.dp)
+                        )
+
+                    }
+
+                }
 
             }
+
         },
         elevation = 0.dp,
         backgroundColor = MaterialTheme.colorScheme.background
@@ -177,6 +220,53 @@ fun ScaffoldSearchBar(mainViewModel: MainViewModel) {
             )
         }
     }
+}
+
+@Composable
+fun ScaffoldBottomBar(mainViewModel: MainViewModel) {
+
+    BottomAppBar(
+        modifier = Modifier.padding(horizontal = 10.dp),
+        containerColor = MaterialTheme.colorScheme.background,
+        tonalElevation = (-5).dp,
+        contentColor = MaterialTheme.colorScheme.onBackground,
+        actions = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(
+                        imageVector = Icons.Filled.Refresh,
+                        contentDescription = "Refresh icon",
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.size(400.dp)
+                    )
+                }
+
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = "Check icon",
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.size(400.dp)
+                    )
+                }
+
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(
+                        imageVector = Icons.Filled.Checklist,
+                        contentDescription = "CheckList icon",
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.size(400.dp)
+                    )
+                }
+            }
+
+        }
+    )
+
+
 }
 
 @Composable
