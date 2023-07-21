@@ -1,4 +1,4 @@
-package com.yama.ui.screen.home.ui
+package com.yama.ui.screen.episodes.ui
 
 import android.content.Context
 import android.util.Log
@@ -35,21 +35,28 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.yama.domain.classes.Anime
+import com.yama.domain.classes.Episode
 import com.yama.navigation.YamaScreens
 import com.yama.ui.scaffold.ScaffoldDrawer
 import com.yama.ui.scaffold.ScaffoldSearchBar
 import com.yama.ui.scaffold.ScaffoldTopBar
+import com.yama.ui.screen.home.ui.DrawerLocation
 import com.yama.ui.screen.viewmodel.MainViewModel
 
-
 @Composable
-fun HomeContentView(mainViewModel: MainViewModel, context: Context, navController: NavController) {
+fun EpisodesContentView(
+    context: Context,
+    mainViewModel: MainViewModel,
+    navController: NavController
+) {
 
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
@@ -71,8 +78,9 @@ fun HomeContentView(mainViewModel: MainViewModel, context: Context, navControlle
                     navController = navController
                 )
             }
+        }, drawerContent = {
+            ScaffoldDrawer(menuItems = navigationItems)
         },
-        drawerContent = { ScaffoldDrawer(menuItems = navigationItems) },
         backgroundColor = MaterialTheme.colorScheme.background,
         drawerBackgroundColor = MaterialTheme.colorScheme.background
     ) {
@@ -82,51 +90,51 @@ fun HomeContentView(mainViewModel: MainViewModel, context: Context, navControlle
                 .padding(it)
                 .padding(start = 2.5.dp, end = 2.5.dp, top = 10.dp, bottom = 2.dp)
         ) {
-            Column() {
+            Column {
                 ScaffoldSearchBar(mainViewModel = mainViewModel)
-                CenterTitlesBox(mainViewModel = mainViewModel, navController = navController)
+                CenterEpisodesBox(mainViewModel = mainViewModel, navController = navController)
             }
         }
     }
 
 }
 
-
 @Composable
-fun CenterTitlesBox(mainViewModel: MainViewModel, navController: NavController) {
+fun CenterEpisodesBox(mainViewModel: MainViewModel, navController: NavController) {
     Column(
         Modifier
             .padding(start = 5.dp, end = 5.dp, top = 5.dp, bottom = 10.dp)
             .border(
                 border = BorderStroke(3.dp, MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(10.dp)
-            ),
+            )
+            .fillMaxSize( ),
         verticalArrangement = Arrangement.Center
     ) {
-        RecyclerViewTitles(mainViewModel, navController = navController)
+        RecyclerViewEpisodes(mainViewModel, navController = navController)
     }
 
 }
 
 @Composable
-private fun RecyclerViewTitles(mainViewModel: MainViewModel, navController: NavController) {
+fun RecyclerViewEpisodes(mainViewModel: MainViewModel, navController: NavController) {
 
-    val media by mainViewModel.anime.collectAsState()
-    val isSearching by mainViewModel.isSearching.collectAsState()
+    val episodes by mainViewModel.episodes.collectAsState()
 
     LazyColumn(
         Modifier
             .padding(5.dp)
             .fillMaxHeight()
     ) {
-        items(media) { item ->
-            ItemTitle(item = item, navController = navController, mainViewModel = mainViewModel)
+        items(episodes) { item ->
+            ItemEpisode(item = item, navController = navController)
         }
     }
+
 }
 
 @Composable
-private fun ItemTitle(item: Anime, navController: NavController, mainViewModel: MainViewModel) {
+fun ItemEpisode(item: Episode, navController: NavController) {
 
     Box(
         modifier = Modifier
@@ -139,9 +147,7 @@ private fun ItemTitle(item: Anime, navController: NavController, mainViewModel: 
                 shape = RoundedCornerShape(10.dp)
             )
             .clickable {
-                mainViewModel.animeSelected(item)
-                navController.navigate(route = YamaScreens.Episodes.route)
-                Log.d("Home_TAG", "Tocaste ${item.title}")
+
             }
     ) {
         Image(
@@ -150,7 +156,8 @@ private fun ItemTitle(item: Anime, navController: NavController, mainViewModel: 
             modifier = Modifier
                 .align(alignment = Alignment.Center)
                 .fillMaxWidth(),
-            contentScale = ContentScale.FillWidth
+            contentScale = ContentScale.FillWidth,
+            colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
         )
         Column(
             Modifier
@@ -170,4 +177,3 @@ private fun ItemTitle(item: Anime, navController: NavController, mainViewModel: 
         }
     }
 }
-

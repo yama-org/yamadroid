@@ -1,9 +1,13 @@
-package com.yama.ui.screen.home.viewmodel
+package com.yama.ui.screen.viewmodel
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.yama.domain.Media
-import com.yama.ui.screen.home.repo.RepositorioDeTesteo.mediaTest
+import com.yama.domain.classes.Anime
+import com.yama.domain.classes.Episode
+import com.yama.ui.screen.home.repo.RepositorioDeTesteo.animeTests
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +19,7 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor() : ViewModel() {
+class MainViewModel @Inject constructor() : ViewModel() {
 
     private val _searchText = MutableStateFlow("")
     val searchText = _searchText.asStateFlow()
@@ -23,43 +27,52 @@ class HomeViewModel @Inject constructor() : ViewModel() {
     private val _isSearching = MutableStateFlow(false)
     val isSearching = _isSearching.asStateFlow()
 
-    private val _media = MutableStateFlow(listOf<Media>())
+    private val _anime = MutableStateFlow(listOf<Anime>())
+
+    private val _episodes = MutableStateFlow(listOf<Episode>())
+    val episodes = _episodes
+
+    var screenUbication by mutableStateOf("Titles")
+
+    private val _selectedAnime = MutableStateFlow(Anime(0, " ", " ", emptyList(), emptyList(), " "))
+    val selectedAnime = _selectedAnime.asStateFlow()
+
 
     @OptIn(FlowPreview::class)
-    val media = searchText
+    val anime = searchText
         .debounce(500L)
-        .combine(_media) { text, media ->
+        .combine(_anime) { text, anime ->
 
             if (text.isBlank()) {
-                media
+                anime
             } else {
-                media.filter {
+                anime.filter {
                     it.doesMatchSearchQuery(text)
                 }
             }
         }.stateIn(
             scope = viewModelScope,
             SharingStarted.WhileSubscribed(5000),
-            _media.value
+            _anime.value
         )
 
     private val _isClicked = MutableStateFlow(false)
     val isClicked = _isClicked.asStateFlow()
 
     init {
-        _media.value = mediaTest
+        _anime.value = animeTests
     }
 
     fun onSearchTextChange(text: String) {
         _searchText.value = text
     }
 
-    fun getMedia(): List<Media> {
-
-        return _media.value
-    }
-
     fun isClicked() {
         _isClicked.value = !_isClicked.value
+    }
+
+    fun animeSelected(anime: Anime) {
+        _selectedAnime.value = anime
+        _episodes.value = _selectedAnime.value.episodes
     }
 }

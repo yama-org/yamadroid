@@ -1,10 +1,11 @@
-package com.yama.domain
+package com.yama.domain.classes
 
-data class Media(
+data class Anime(
     val id: Int,
     val title: String,
     val description: String,
     val genres: List<String>,
+    val episodes: List<Episode>,
     val thumbnail: String
 ) {
 
