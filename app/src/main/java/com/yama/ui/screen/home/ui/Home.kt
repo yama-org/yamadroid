@@ -44,6 +44,7 @@ import com.yama.domain.classes.Anime
 import com.yama.navigation.YamaScreens
 import com.yama.ui.scaffold.ScaffoldDrawer
 import com.yama.ui.scaffold.ScaffoldSearchBar
+import com.yama.ui.scaffold.ScaffoldSearchTopBar
 import com.yama.ui.scaffold.ScaffoldTopBar
 import com.yama.ui.screen.viewmodel.MainViewModel
 
@@ -71,6 +72,16 @@ fun HomeContentView(mainViewModel: MainViewModel, context: Context, navControlle
                     navController = navController
                 )
             }
+            AnimatedVisibility(
+                visible = isClicked,
+                enter = fadeIn() + slideInHorizontally(initialOffsetX = { it }),
+                exit = fadeOut() + slideOutHorizontally(targetOffsetX = { it })
+            ) {
+                ScaffoldSearchTopBar(
+                    scope = scope,
+                    mainViewModel = mainViewModel
+                )
+            }
         },
         drawerContent = { ScaffoldDrawer(menuItems = navigationItems) },
         backgroundColor = MaterialTheme.colorScheme.background,
@@ -83,7 +94,6 @@ fun HomeContentView(mainViewModel: MainViewModel, context: Context, navControlle
                 .padding(start = 2.5.dp, end = 2.5.dp, top = 10.dp, bottom = 2.dp)
         ) {
             Column() {
-                //ScaffoldSearchBar(mainViewModel = mainViewModel)
                 CenterTitlesBox(mainViewModel = mainViewModel, navController = navController)
             }
         }
@@ -112,7 +122,6 @@ fun CenterTitlesBox(mainViewModel: MainViewModel, navController: NavController) 
 private fun RecyclerViewTitles(mainViewModel: MainViewModel, navController: NavController) {
 
     val anime by mainViewModel.anime.collectAsState()
-    val isSearching by mainViewModel.isSearching.collectAsState()
 
     LazyColumn(
         Modifier
@@ -140,6 +149,9 @@ private fun ItemTitle(item: Anime, navController: NavController, mainViewModel: 
             )
             .clickable {
                 mainViewModel.animeSelected(item)
+                if (mainViewModel.isClicked.value) {
+                    mainViewModel.isClicked()
+                }
                 navController.navigate(route = YamaScreens.Episodes.route)
                 Log.d("Home_TAG", "Tocaste ${item.title}")
             }

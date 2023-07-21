@@ -46,6 +46,7 @@ class MainViewModel @Inject constructor() : ViewModel() {
                 anime
             } else {
                 anime.filter {
+                    _isSearching.value = true
                     it.doesMatchSearchQuery(text)
                 }
             }
@@ -93,6 +94,10 @@ class MainViewModel @Inject constructor() : ViewModel() {
 
     fun isPressed() {
         _isPressed.value = !_isPressed.value
+    }
+
+    fun isSearching() {
+        _isSearching.value = !_isSearching.value
     }
 
     fun isNotPressed() {

@@ -1,6 +1,8 @@
 package com.yama.ui.scaffold
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
@@ -32,6 +35,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -39,6 +43,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -48,6 +53,7 @@ import com.example.yama.R
 import com.yama.navigation.YamaScreens
 import com.yama.ui.screen.home.ui.DrawerLocation
 import com.yama.ui.screen.viewmodel.MainViewModel
+import com.yama.ui.theme.backgroundColor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -60,7 +66,7 @@ fun ScaffoldTopBar(
 ) {
 
     TopAppBar(
-        modifier = Modifier.padding(start = 5.dp, end = 5.dp),
+        modifier = Modifier.padding(top = 10.dp, start = 5.dp, end = 5.dp),
         title = {
             Text(
                 text = mainViewModel.screenUbication,
@@ -170,15 +176,11 @@ fun ScaffoldTopBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScaffoldSearchTopBar(
-    scaffoldState: ScaffoldState,
     scope: CoroutineScope,
-    mainViewModel: MainViewModel,
-    navController: NavController
+    mainViewModel: MainViewModel
 ) {
-
-    val searchText by mainViewModel.searchText.collectAsState()
-
     CenterAlignedTopAppBar(
+        modifier = Modifier.padding(top = 10.dp),
         title = { },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(MaterialTheme.colorScheme.background),
         navigationIcon = {
@@ -201,37 +203,40 @@ fun ScaffoldSearchTopBar(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScaffoldSearchBar(mainViewModel: MainViewModel) {
 
     val searchText by mainViewModel.searchText.collectAsState()
-    val isClicked by mainViewModel.isClicked.collectAsState()
 
 
     Row(
         modifier = Modifier
-            .width(300.dp),
+            .width(350.dp),
         horizontalArrangement = Arrangement.Center
     ) {
 
-        TextField(
+        OutlinedTextField(
             value = searchText,
             onValueChange = mainViewModel::onSearchTextChange,
+
+            colors = androidx.compose.material3.TextFieldDefaults.outlinedTextFieldColors(
+                containerColor = MaterialTheme.colorScheme.tertiary,
+                cursorColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.secondary,
+                textColor = MaterialTheme.colorScheme.onBackground
+            ),
             placeholder = {
                 Text(
                     text = "Search title...",
                     style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.background,
+                    color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             },
             shape = RoundedCornerShape(12),
             singleLine = true,
-            colors = TextFieldDefaults.textFieldColors(
-                backgroundColor = MaterialTheme.colorScheme.onBackground,
-                focusedIndicatorColor = MaterialTheme.colorScheme.primary
-            ),
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 15.dp)

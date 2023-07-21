@@ -73,10 +73,8 @@ fun EpisodesContentView(
 
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
-    val navigationItems = listOf(DrawerLocation.Settings, DrawerLocation.About)
     val isClicked by mainViewModel.isClicked.collectAsState()
     val isPressed by mainViewModel.isPressed.collectAsState()
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -98,10 +96,8 @@ fun EpisodesContentView(
                 exit = fadeOut() + slideOutHorizontally(targetOffsetX = { it })
             ) {
                 ScaffoldSearchTopBar(
-                    scaffoldState = scaffoldState,
                     scope = scope,
-                    mainViewModel = mainViewModel,
-                    navController = navController
+                    mainViewModel = mainViewModel
                 )
             }
         },
@@ -124,7 +120,6 @@ fun EpisodesContentView(
                 .padding(start = 2.5.dp, end = 2.5.dp, top = 10.dp, bottom = 2.dp)
         ) {
             Column {
-                //ScaffoldSearchBar(mainViewModel = mainViewModel)
                 CenterEpisodesBox(
                     mainViewModel = mainViewModel,
                     navController = navController,

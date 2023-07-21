@@ -4,4 +4,5 @@
 - Implementaciones: DaggerHilt, Retrofit.
 - Frontend: Comienzo de primera pantalla "home", diseño inicial y testeo con datos de prueba.
 
+Issues: Arreglar el color del OutlinedText y arreglar el bug en buscar anime/episodio
 ***
