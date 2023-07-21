@@ -78,8 +78,6 @@ fun EpisodesContentView(
                     navController = navController
                 )
             }
-        }, drawerContent = {
-            ScaffoldDrawer(menuItems = navigationItems)
         },
         backgroundColor = MaterialTheme.colorScheme.background,
         drawerBackgroundColor = MaterialTheme.colorScheme.background
@@ -108,7 +106,7 @@ fun CenterEpisodesBox(mainViewModel: MainViewModel, navController: NavController
                 border = BorderStroke(3.dp, MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(10.dp)
             )
-            .fillMaxSize( ),
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Center
     ) {
         RecyclerViewEpisodes(mainViewModel, navController = navController)
