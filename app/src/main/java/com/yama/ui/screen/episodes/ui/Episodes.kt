@@ -13,11 +13,11 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.with
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,15 +31,11 @@ import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
-import androidx.compose.material3.BottomAppBarDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -47,8 +43,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
@@ -59,13 +53,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.yama.R
 import com.yama.domain.classes.Episode
-import com.yama.navigation.YamaScreens
 import com.yama.ui.scaffold.ScaffoldBottomBar
-import com.yama.ui.scaffold.ScaffoldDrawer
-import com.yama.ui.scaffold.ScaffoldSearchBar
 import com.yama.ui.scaffold.ScaffoldSearchTopBar
 import com.yama.ui.scaffold.ScaffoldTopBar
-import com.yama.ui.screen.home.ui.DrawerLocation
 import com.yama.ui.screen.viewmodel.MainViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -80,7 +70,7 @@ fun EpisodesContentView(
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
     val isClicked by mainViewModel.isClicked.collectAsState()
-    val isPressed by mainViewModel.isPressed.collectAsState()
+    val isPressed by mainViewModel.isEpisodeLongClicked.collectAsState()
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -224,7 +214,7 @@ fun ItemEpisode(
     scope: CoroutineScope
 ) {
 
-    val isPressed by mainViewModel.isPressed.collectAsState()
+    val isPressed by mainViewModel.isEpisodeLongClicked.collectAsState()
 
     AnimatedContent(
         targetState = isPressed,
@@ -256,6 +246,7 @@ fun ItemEpisode(
 }
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EpisodeCard(
     item: Episode,
@@ -274,12 +265,15 @@ fun EpisodeCard(
                 BorderStroke(3.dp, color = color),
                 shape = RoundedCornerShape(10.dp)
             )
-            .clickable {
-                scope.launch {
-                    mainViewModel.isPressed()
-                    /*Logica de ver cap*/
-                }
-            }
+            .combinedClickable(
+                onClick = {/*Navegacion*/ },
+                onLongClick = {
+                    scope.launch {
+                        mainViewModel.isEpisodeLongClicked()
+                        /*Logica de */
+                    }
+                })
+
     ) {
         Image(
             painter = painterResource(id = item.thumbnail.toInt()),

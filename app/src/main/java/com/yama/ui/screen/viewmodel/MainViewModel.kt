@@ -77,8 +77,8 @@ class MainViewModel @Inject constructor() : ViewModel() {
     private val _isClicked = MutableStateFlow(false)
     val isClicked = _isClicked.asStateFlow()
 
-    private val _isPressed = MutableStateFlow(false)
-    val isPressed = _isPressed.asStateFlow()
+    private val _isEpisodeLongClicked = MutableStateFlow(false)
+    val isEpisodeLongClicked = _isEpisodeLongClicked.asStateFlow()
 
     init {
         _anime.value = animeTests
@@ -92,16 +92,16 @@ class MainViewModel @Inject constructor() : ViewModel() {
         _isClicked.value = !_isClicked.value
     }
 
-    fun isPressed() {
-        _isPressed.value = !_isPressed.value
+    fun isEpisodeLongClicked() {
+        _isEpisodeLongClicked.value = !_isEpisodeLongClicked.value
     }
 
     fun emptySearch() {
         _searchText.value = ""
     }
 
-    fun isNotPressed() {
-        _isPressed.value = false
+    fun isEpisodeNotMoreLongClicked() {
+        _isEpisodeLongClicked.value = false
     }
 
     fun animeSelected(anime: Anime) {
