@@ -33,7 +33,7 @@ class MainViewModel @Inject constructor() : ViewModel() {
 
     var screenUbication by mutableStateOf("Titles")
 
-    private val _selectedAnime = MutableStateFlow(Anime(0, " ", " ", emptyList(), emptyList(), " "))
+    private val _selectedAnime = MutableStateFlow(Anime(0, "", "", emptyList(), emptyList(), ""))
     val selectedAnime = _selectedAnime.asStateFlow()
 
 
@@ -97,9 +97,8 @@ class MainViewModel @Inject constructor() : ViewModel() {
     }
 
     fun emptySearch() {
-        _searchText.value = " "
+        _searchText.value = ""
     }
-
 
     fun isNotPressed() {
         _isPressed.value = false

@@ -1,13 +1,17 @@
 package com.yama.ui.screen.episodes.ui
 
 import android.content.Context
+import android.util.Log
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.with
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -197,6 +201,8 @@ fun RecyclerViewEpisodes(
                 .fillMaxHeight()
         ) {
             items(episodes) { item ->
+
+                Log.d("EPISODE", "Index: $item")
                 ItemEpisode(
                     item = item,
                     navController = navController,
@@ -209,6 +215,7 @@ fun RecyclerViewEpisodes(
 
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ItemEpisode(
     item: Episode,
@@ -217,6 +224,46 @@ fun ItemEpisode(
     scope: CoroutineScope
 ) {
 
+    val isPressed by mainViewModel.isPressed.collectAsState()
+
+    AnimatedContent(
+        targetState = isPressed,
+        transitionSpec = { fadeIn() with fadeOut() }
+    ) {
+
+        if (isPressed) {
+
+            EpisodeCard(
+                item = item,
+                navController = navController,
+                mainViewModel = mainViewModel,
+                scope = scope,
+                color = MaterialTheme.colorScheme.inversePrimary
+            )
+
+        } else {
+
+            EpisodeCard(
+                item = item,
+                navController = navController,
+                mainViewModel = mainViewModel,
+                scope = scope,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+
+}
+
+
+@Composable
+fun EpisodeCard(
+    item: Episode,
+    navController: NavController,
+    mainViewModel: MainViewModel,
+    scope: CoroutineScope,
+    color: Color
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -224,7 +271,7 @@ fun ItemEpisode(
             .padding(vertical = 10.dp, horizontal = 10.dp)
             .clip(shape = RoundedCornerShape(10.dp))
             .border(
-                BorderStroke(3.dp, color = MaterialTheme.colorScheme.secondary),
+                BorderStroke(3.dp, color = color),
                 shape = RoundedCornerShape(10.dp)
             )
             .clickable {
@@ -260,4 +307,6 @@ fun ItemEpisode(
             )
         }
     }
+
 }
+

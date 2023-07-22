@@ -11,8 +11,12 @@ data class Anime(
 
     fun doesMatchSearchQuery(query: String): Boolean {
         val matchingCombinations = listOf(
-            "$title",
-            "${title.first()}"
+            title,
+            " $title",
+            "$title ",
+            "${title.first()}",
+            " ${title.first()}",
+            "${title.first()} "
         )
 
         return matchingCombinations.any {
