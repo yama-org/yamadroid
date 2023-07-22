@@ -17,12 +17,14 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
@@ -51,6 +53,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.yama.R
 import com.yama.domain.classes.Episode
 import com.yama.navigation.YamaScreens
 import com.yama.ui.scaffold.ScaffoldBottomBar
@@ -63,7 +66,6 @@ import com.yama.ui.screen.viewmodel.MainViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EpisodesContentView(
     context: Context,
@@ -91,7 +93,8 @@ fun EpisodesContentView(
                     navController = navController
                 )
             }
-            AnimatedVisibility(visible = isClicked,
+            AnimatedVisibility(
+                visible = isClicked,
                 enter = fadeIn() + slideInHorizontally(initialOffsetX = { it }),
                 exit = fadeOut() + slideOutHorizontally(targetOffsetX = { it })
             ) {
@@ -161,18 +164,46 @@ fun RecyclerViewEpisodes(
 
     val episodes by mainViewModel.episode.collectAsState()
 
-    LazyColumn(
-        Modifier
-            .padding(5.dp)
-            .fillMaxHeight()
-    ) {
-        items(episodes) { item ->
-            ItemEpisode(
-                item = item,
-                navController = navController,
-                mainViewModel = mainViewModel,
-                scope = scope
+    if (episodes.isEmpty()) {
+        Column(
+            Modifier
+                .padding(5.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.yama_noepisodes),
+                contentDescription = "no episodes",
+                modifier = Modifier
+                    .size(width = 250.dp, height = 300.dp)
+                    .padding(end = 20.dp),
+                contentScale = ContentScale.Fit,
+                colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }),
+                alpha = 5f
             )
+            Spacer(modifier = Modifier.padding(vertical = 5.dp))
+
+            Text(
+                text = "Sorry... No episodes found",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
+    } else {
+        LazyColumn(
+            Modifier
+                .padding(5.dp)
+                .fillMaxHeight()
+        ) {
+            items(episodes) { item ->
+                ItemEpisode(
+                    item = item,
+                    navController = navController,
+                    mainViewModel = mainViewModel,
+                    scope = scope
+                )
+            }
         }
     }
 
@@ -197,9 +228,10 @@ fun ItemEpisode(
                 shape = RoundedCornerShape(10.dp)
             )
             .clickable {
-                /*Logica de ver cap*/
-                scope.launch { mainViewModel.isPressed() }
-
+                scope.launch {
+                    mainViewModel.isPressed()
+                    /*Logica de ver cap*/
+                }
             }
     ) {
         Image(

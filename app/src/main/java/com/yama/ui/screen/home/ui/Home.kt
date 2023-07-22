@@ -152,6 +152,7 @@ private fun ItemTitle(item: Anime, navController: NavController, mainViewModel: 
                 if (mainViewModel.isClicked.value) {
                     mainViewModel.isClicked()
                 }
+                mainViewModel.emptySearch()
                 navController.navigate(route = YamaScreens.Episodes.route)
                 Log.d("Home_TAG", "Tocaste ${item.title}")
             }

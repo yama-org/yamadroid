@@ -96,9 +96,10 @@ class MainViewModel @Inject constructor() : ViewModel() {
         _isPressed.value = !_isPressed.value
     }
 
-    fun isSearching() {
-        _isSearching.value = !_isSearching.value
+    fun emptySearch() {
+        _searchText.value = " "
     }
+
 
     fun isNotPressed() {
         _isPressed.value = false

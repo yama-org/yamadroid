@@ -1,8 +1,6 @@
 package com.yama.ui.scaffold
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,11 +12,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.TextButton
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -43,7 +38,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -53,7 +47,6 @@ import com.example.yama.R
 import com.yama.navigation.YamaScreens
 import com.yama.ui.screen.home.ui.DrawerLocation
 import com.yama.ui.screen.viewmodel.MainViewModel
-import com.yama.ui.theme.backgroundColor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -179,6 +172,7 @@ fun ScaffoldSearchTopBar(
     scope: CoroutineScope,
     mainViewModel: MainViewModel
 ) {
+
     CenterAlignedTopAppBar(
         modifier = Modifier.padding(top = 10.dp),
         title = { },
@@ -187,6 +181,7 @@ fun ScaffoldSearchTopBar(
             IconButton(
                 onClick = {
                     scope.launch {
+                        mainViewModel.emptySearch()
                         mainViewModel.isClicked()
                     }
                 }
@@ -208,7 +203,6 @@ fun ScaffoldSearchTopBar(
 fun ScaffoldSearchBar(mainViewModel: MainViewModel) {
 
     val searchText by mainViewModel.searchText.collectAsState()
-
 
     Row(
         modifier = Modifier
@@ -303,7 +297,7 @@ fun ScaffoldDrawer(menuItems: List<DrawerLocation>) {
 
     val textVersion = "0.0.1"
 
-    Column() {
+    Column {
 
         Image(
             painter = painterResource(id = R.drawable.yamaicon),
