@@ -4,7 +4,8 @@ data class Episode(
     val title: String,
     val duration: Int,
     val description: String,
-    val thumbnail: String
+    val thumbnail: String,
+    var isSelected: Boolean = false
 ) {
 
     fun doesMatchSearchQuery(query: String): Boolean {

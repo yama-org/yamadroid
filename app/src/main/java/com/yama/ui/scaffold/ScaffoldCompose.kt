@@ -93,7 +93,8 @@ fun ScaffoldTopBar(
                     IconButton(
                         onClick = {
                             scope.launch {
-                                mainViewModel.isEpisodeNotMoreLongClicked()
+                                mainViewModel.emptyEpisodesSelected()
+                                mainViewModel.bottombarCheck()
                                 navController.navigate(YamaScreens.Home.route)
                             }
                         }

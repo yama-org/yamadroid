@@ -30,7 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
@@ -39,11 +39,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
@@ -70,7 +73,7 @@ fun EpisodesContentView(
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
     val isClicked by mainViewModel.isClicked.collectAsState()
-    val isPressed by mainViewModel.isEpisodeLongClicked.collectAsState()
+    val isPressed by mainViewModel.isBottomBarActive.collectAsState()
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -190,14 +193,15 @@ fun RecyclerViewEpisodes(
                 .padding(5.dp)
                 .fillMaxHeight()
         ) {
-            items(episodes) { item ->
 
-                Log.d("EPISODE", "Index: $item")
-                ItemEpisode(
+            itemsIndexed(episodes) { index, item ->
+
+                EpisodeCard(
                     item = item,
                     navController = navController,
                     mainViewModel = mainViewModel,
-                    scope = scope
+                    scope = scope,
+                    index = index
                 )
             }
         }
@@ -205,102 +209,133 @@ fun RecyclerViewEpisodes(
 
 }
 
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-fun ItemEpisode(
-    item: Episode,
-    navController: NavController,
-    mainViewModel: MainViewModel,
-    scope: CoroutineScope
-) {
-
-    val isPressed by mainViewModel.isEpisodeLongClicked.collectAsState()
-
-    AnimatedContent(
-        targetState = isPressed,
-        transitionSpec = { fadeIn() with fadeOut() }
-    ) {
-
-        if (isPressed) {
-
-            EpisodeCard(
-                item = item,
-                navController = navController,
-                mainViewModel = mainViewModel,
-                scope = scope,
-                color = MaterialTheme.colorScheme.inversePrimary
-            )
-
-        } else {
-
-            EpisodeCard(
-                item = item,
-                navController = navController,
-                mainViewModel = mainViewModel,
-                scope = scope,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-    }
-
-}
-
-
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun EpisodeCard(
     item: Episode,
     navController: NavController,
     mainViewModel: MainViewModel,
     scope: CoroutineScope,
-    color: Color
+    index: Int
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(180.dp)
-            .padding(vertical = 10.dp, horizontal = 10.dp)
-            .clip(shape = RoundedCornerShape(10.dp))
-            .border(
-                BorderStroke(3.dp, color = color),
-                shape = RoundedCornerShape(10.dp)
-            )
-            .combinedClickable(
-                onClick = {/*Navegacion*/ },
-                onLongClick = {
-                    scope.launch {
-                        mainViewModel.isEpisodeLongClicked()
-                        /*Logica de */
-                    }
-                })
+    var isSelected by rememberSaveable { mutableStateOf(item.isSelected) }
 
-    ) {
-        Image(
-            painter = painterResource(id = item.thumbnail.toInt()),
-            contentDescription = "title image",
-            modifier = Modifier
-                .align(alignment = Alignment.Center)
-                .fillMaxWidth(),
-            contentScale = ContentScale.FillWidth,
-            colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
-        )
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomStart)
-                .background(color = MaterialTheme.colorScheme.background.copy(alpha = 0.9f))
-                .safeContentPadding()
-                .padding(vertical = 8.dp, horizontal = 15.dp)
-        ) {
-            Text(
-                text = item.title,
-                style = MaterialTheme.typography.bodyLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
+    AnimatedContent(targetState = isSelected, label = "", content = {
+
+        if (isSelected) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .padding(vertical = 10.dp, horizontal = 10.dp)
+                    .clip(shape = RoundedCornerShape(10.dp))
+                    .border(
+                        BorderStroke(
+                            3.dp,
+                            color = MaterialTheme.colorScheme.inversePrimary
+                        ),
+                        shape = RoundedCornerShape(10.dp)
+                    )
+                    .combinedClickable(
+                        onClick = {/*Navegacion*/ },
+                        onLongClick = {
+                            scope.launch {
+
+                                mainViewModel.activeBottomBar()
+                                mainViewModel.episodeSelected(index)
+                                isSelected = !isSelected
+                                mainViewModel.bottombarCheck()
+                                Log.d("INDEX", "$index")
+                            }
+                        })
+
+            ) {
+                Image(
+                    painter = painterResource(id = item.thumbnail.toInt()),
+                    contentDescription = "title image",
+                    modifier = Modifier
+                        .align(alignment = Alignment.Center)
+                        .fillMaxWidth(),
+                    contentScale = ContentScale.FillWidth
+                )
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomStart)
+                        .background(color = MaterialTheme.colorScheme.background.copy(alpha = 0.9f))
+                        .safeContentPadding()
+                        .padding(vertical = 8.dp, horizontal = 15.dp)
+                ) {
+                    Text(
+                        text = item.title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+            }
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .padding(vertical = 10.dp, horizontal = 10.dp)
+                    .clip(shape = RoundedCornerShape(10.dp))
+                    .border(
+                        BorderStroke(
+                            3.dp,
+                            color = MaterialTheme.colorScheme.secondary
+                        ),
+                        shape = RoundedCornerShape(10.dp)
+                    )
+                    .combinedClickable(
+                        onClick = {/*Navegacion*/ },
+                        onLongClick = {
+                            scope.launch {
+
+                                mainViewModel.activeBottomBar()
+                                mainViewModel.episodeSelected(index)
+                                isSelected = !isSelected
+                                mainViewModel.bottombarCheck()
+                                Log.d("INDEX", "$index")
+                            }
+                        })
+
+            ) {
+                Image(
+                    painter = painterResource(id = item.thumbnail.toInt()),
+                    contentDescription = "title image",
+                    modifier = Modifier
+                        .align(alignment = Alignment.Center)
+                        .fillMaxWidth(),
+                    contentScale = ContentScale.FillWidth,
+                    colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply {
+                        setToSaturation(
+                            0f
+                        )
+                    })
+                )
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomStart)
+                        .background(color = MaterialTheme.colorScheme.background.copy(alpha = 0.9f))
+                        .safeContentPadding()
+                        .padding(vertical = 8.dp, horizontal = 15.dp)
+                ) {
+                    Text(
+                        text = item.title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+            }
         }
-    }
-
+    },
+        transitionSpec = { fadeIn() with fadeOut() }
+    )
 }
 

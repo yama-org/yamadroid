@@ -30,12 +30,18 @@ class MainViewModel @Inject constructor() : ViewModel() {
     private val _anime = MutableStateFlow(listOf<Anime>())
 
     private val _episodes = MutableStateFlow(listOf<Episode>())
+    val episodes = _episodes
 
     var screenUbication by mutableStateOf("Titles")
 
     private val _selectedAnime = MutableStateFlow(Anime(0, "", "", emptyList(), emptyList(), ""))
     val selectedAnime = _selectedAnime.asStateFlow()
 
+    private val _isClicked = MutableStateFlow(false)
+    val isClicked = _isClicked.asStateFlow()
+
+    private val _isBottomBarActive = MutableStateFlow(false)
+    val isBottomBarActive = _isBottomBarActive.asStateFlow()
 
     @OptIn(FlowPreview::class)
     val anime = searchText
@@ -74,11 +80,6 @@ class MainViewModel @Inject constructor() : ViewModel() {
             _episodes.value
         )
 
-    private val _isClicked = MutableStateFlow(false)
-    val isClicked = _isClicked.asStateFlow()
-
-    private val _isEpisodeLongClicked = MutableStateFlow(false)
-    val isEpisodeLongClicked = _isEpisodeLongClicked.asStateFlow()
 
     init {
         _anime.value = animeTests
@@ -92,17 +93,43 @@ class MainViewModel @Inject constructor() : ViewModel() {
         _isClicked.value = !_isClicked.value
     }
 
-    fun isEpisodeLongClicked() {
-        _isEpisodeLongClicked.value = !_isEpisodeLongClicked.value
-    }
 
     fun emptySearch() {
         _searchText.value = ""
     }
 
-    fun isEpisodeNotMoreLongClicked() {
-        _isEpisodeLongClicked.value = false
+    fun activeBottomBar() {
+        _isBottomBarActive.value = true
     }
+
+    fun desactiveBottomBar() {
+        _isBottomBarActive.value = false
+    }
+
+    fun getEpisodesSelected() : List<Episode> {
+        return _episodes.value.filter { it.isSelected }
+    }
+
+    fun bottombarCheck() {
+
+        if(getEpisodesSelected().isEmpty()) {
+            desactiveBottomBar()
+        }
+
+    }
+
+    fun emptyEpisodesSelected() {
+
+        getEpisodesSelected().forEach {
+            it.isSelected = false
+        }
+
+    }
+
+    fun episodeSelected(index: Int) {
+        _episodes.value[index].isSelected = !_episodes.value[index].isSelected
+    }
+
 
     fun animeSelected(anime: Anime) {
         _selectedAnime.value = anime
