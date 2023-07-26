@@ -5,13 +5,18 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.yama.ui.screen.episodes.EpisodeViewModel
 import com.yama.ui.screen.episodes.ui.EpisodesContentView
 import com.yama.ui.screen.home.ui.HomeContentView
 import com.yama.ui.screen.viewmodel.MainViewModel
 
 @Composable
 
-fun AppNavigation(mainViewModel: MainViewModel, context: Context) {
+fun AppNavigation(
+    mainViewModel: MainViewModel,
+    context: Context,
+    episodeViewModel: EpisodeViewModel
+) {
 
     val navController = rememberNavController()
 
@@ -20,6 +25,7 @@ fun AppNavigation(mainViewModel: MainViewModel, context: Context) {
             mainViewModel.screenUbication = "Titles"
             HomeContentView(
                 mainViewModel = mainViewModel,
+                episodeViewModel = episodeViewModel,
                 context = context,
                 navController = navController
             )
@@ -30,6 +36,7 @@ fun AppNavigation(mainViewModel: MainViewModel, context: Context) {
             EpisodesContentView(
                 context = context,
                 mainViewModel = mainViewModel,
+                episodeViewModel = episodeViewModel,
                 navController = navController
             )
         }

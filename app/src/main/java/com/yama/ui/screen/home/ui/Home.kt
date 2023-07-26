@@ -46,11 +46,17 @@ import com.yama.ui.scaffold.ScaffoldDrawer
 import com.yama.ui.scaffold.ScaffoldSearchBar
 import com.yama.ui.scaffold.ScaffoldSearchTopBar
 import com.yama.ui.scaffold.ScaffoldTopBar
+import com.yama.ui.screen.episodes.EpisodeViewModel
 import com.yama.ui.screen.viewmodel.MainViewModel
 
 
 @Composable
-fun HomeContentView(mainViewModel: MainViewModel, context: Context, navController: NavController) {
+fun HomeContentView(
+    mainViewModel: MainViewModel,
+    episodeViewModel: EpisodeViewModel,
+    context: Context,
+    navController: NavController
+) {
 
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
@@ -69,6 +75,7 @@ fun HomeContentView(mainViewModel: MainViewModel, context: Context, navControlle
                     scaffoldState = scaffoldState,
                     scope = scope,
                     mainViewModel = mainViewModel,
+                    episodeViewModel = episodeViewModel,
                     navController = navController
                 )
             }
@@ -79,7 +86,8 @@ fun HomeContentView(mainViewModel: MainViewModel, context: Context, navControlle
             ) {
                 ScaffoldSearchTopBar(
                     scope = scope,
-                    mainViewModel = mainViewModel
+                    mainViewModel = mainViewModel,
+                    episodeViewModel = episodeViewModel
                 )
             }
         },

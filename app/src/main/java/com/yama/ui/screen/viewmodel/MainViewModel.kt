@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yama.domain.classes.Anime
 import com.yama.domain.classes.Episode
+import com.yama.ui.screen.episodes.EpisodeViewModel
 import com.yama.ui.screen.home.repo.RepositorioDeTesteo.animeTests
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
@@ -29,9 +30,6 @@ class MainViewModel @Inject constructor() : ViewModel() {
 
     private val _anime = MutableStateFlow(listOf<Anime>())
 
-    private val _episodes = MutableStateFlow(listOf<Episode>())
-    val episodes = _episodes
-
     var screenUbication by mutableStateOf("Titles")
 
     private val _selectedAnime = MutableStateFlow(Anime(0, "", "", emptyList(), emptyList(), ""))
@@ -40,8 +38,6 @@ class MainViewModel @Inject constructor() : ViewModel() {
     private val _isClicked = MutableStateFlow(false)
     val isClicked = _isClicked.asStateFlow()
 
-    private val _isBottomBarActive = MutableStateFlow(false)
-    val isBottomBarActive = _isBottomBarActive.asStateFlow()
 
     @OptIn(FlowPreview::class)
     val anime = searchText
@@ -62,24 +58,6 @@ class MainViewModel @Inject constructor() : ViewModel() {
             _anime.value
         )
 
-    @OptIn(FlowPreview::class)
-    val episode = searchText
-        .debounce(500L)
-        .combine(_episodes) { text, episode ->
-
-            if (text.isBlank()) {
-                episode
-            } else {
-                episode.filter {
-                    it.doesMatchSearchQuery(text)
-                }
-            }
-        }.stateIn(
-            scope = viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            _episodes.value
-        )
-
 
     init {
         _anime.value = animeTests
@@ -93,46 +71,13 @@ class MainViewModel @Inject constructor() : ViewModel() {
         _isClicked.value = !_isClicked.value
     }
 
-
     fun emptySearch() {
         _searchText.value = ""
     }
 
-    fun activeBottomBar() {
-        _isBottomBarActive.value = true
-    }
-
-    fun desactiveBottomBar() {
-        _isBottomBarActive.value = false
-    }
-
-    fun getEpisodesSelected() : List<Episode> {
-        return _episodes.value.filter { it.isSelected }
-    }
-
-    fun bottombarCheck() {
-
-        if(getEpisodesSelected().isEmpty()) {
-            desactiveBottomBar()
-        }
-
-    }
-
-    fun emptyEpisodesSelected() {
-
-        getEpisodesSelected().forEach {
-            it.isSelected = false
-        }
-
-    }
-
-    fun episodeSelected(index: Int) {
-        _episodes.value[index].isSelected = !_episodes.value[index].isSelected
-    }
-
-
     fun animeSelected(anime: Anime) {
         _selectedAnime.value = anime
-        _episodes.value = _selectedAnime.value.episodes
     }
+
+    fun getAnime(): Anime = _selectedAnime.value
 }

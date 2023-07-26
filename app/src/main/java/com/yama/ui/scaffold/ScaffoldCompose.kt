@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.yama.R
 import com.yama.navigation.YamaScreens
+import com.yama.ui.screen.episodes.EpisodeViewModel
 import com.yama.ui.screen.home.ui.DrawerLocation
 import com.yama.ui.screen.viewmodel.MainViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -55,6 +56,7 @@ fun ScaffoldTopBar(
     scaffoldState: ScaffoldState,
     scope: CoroutineScope,
     mainViewModel: MainViewModel,
+    episodeViewModel: EpisodeViewModel,
     navController: NavController
 ) {
 
@@ -93,8 +95,8 @@ fun ScaffoldTopBar(
                     IconButton(
                         onClick = {
                             scope.launch {
-                                mainViewModel.emptyEpisodesSelected()
-                                mainViewModel.bottombarCheck()
+                                episodeViewModel.emptyEpisodesSelected()
+                                episodeViewModel.bottombarCheck()
                                 navController.navigate(YamaScreens.Home.route)
                             }
                         }
@@ -143,7 +145,7 @@ fun ScaffoldTopBar(
 
                     IconButton(onClick = {
                         scope.launch {
-                            mainViewModel.isClicked()
+                            episodeViewModel.isClicked()
                         }
 
                     }) {
@@ -171,39 +173,71 @@ fun ScaffoldTopBar(
 @Composable
 fun ScaffoldSearchTopBar(
     scope: CoroutineScope,
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
+    episodeViewModel: EpisodeViewModel
 ) {
 
+    val screenUbication = mainViewModel.screenUbication
     CenterAlignedTopAppBar(
         modifier = Modifier.padding(top = 10.dp),
         title = { },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(MaterialTheme.colorScheme.background),
         navigationIcon = {
-            IconButton(
-                onClick = {
-                    scope.launch {
-                        mainViewModel.emptySearch()
-                        mainViewModel.isClicked()
+            when (screenUbication) {
+
+                "Titles" -> {
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                mainViewModel.emptySearch()
+                                mainViewModel.isClicked()
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Back icon",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(35.dp)
+                        )
                     }
                 }
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = "Back icon",
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(35.dp)
-                )
+
+                "Episodes" -> {
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                episodeViewModel.emptySearch()
+                                episodeViewModel.isClicked()
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Back icon",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(35.dp)
+                        )
+                    }
+                }
             }
         },
-        actions = { ScaffoldSearchBar(mainViewModel = mainViewModel) })
-
+        actions = {
+            ScaffoldSearchBar(
+                mainViewModel = mainViewModel,
+                episodeViewModel = episodeViewModel
+            )
+        })
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScaffoldSearchBar(mainViewModel: MainViewModel) {
+fun ScaffoldSearchBar(mainViewModel: MainViewModel, episodeViewModel: EpisodeViewModel) {
 
-    val searchText by mainViewModel.searchText.collectAsState()
+    val searchAnimeTitle by mainViewModel.searchText.collectAsState()
+    val searchEpisodeTitle by episodeViewModel.searchText.collectAsState()
+    val screenUbication = mainViewModel.screenUbication
 
     Row(
         modifier = Modifier
@@ -211,36 +245,70 @@ fun ScaffoldSearchBar(mainViewModel: MainViewModel) {
         horizontalArrangement = Arrangement.Center
     ) {
 
-        OutlinedTextField(
-            value = searchText,
-            onValueChange = mainViewModel::onSearchTextChange,
+        when (screenUbication) {
 
-            colors = androidx.compose.material3.TextFieldDefaults.outlinedTextFieldColors(
-                containerColor = MaterialTheme.colorScheme.tertiary,
-                cursorColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.secondary,
-                textColor = MaterialTheme.colorScheme.onBackground
-            ),
-            placeholder = {
-                Text(
-                    text = "Search title...",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+            "Titles" -> {
+                OutlinedTextField(
+                    value = searchAnimeTitle,
+                    onValueChange = mainViewModel::onSearchTextChange,
+
+                    colors = androidx.compose.material3.TextFieldDefaults.outlinedTextFieldColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        cursorColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.secondary,
+                        textColor = MaterialTheme.colorScheme.onBackground
+                    ),
+                    placeholder = {
+                        Text(
+                            text = "Search title...",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
+                    shape = RoundedCornerShape(12),
+                    singleLine = true,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 15.dp)
                 )
-            },
-            shape = RoundedCornerShape(12),
-            singleLine = true,
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = 15.dp)
-        )
+            }
+
+            "Episodes" -> {
+                OutlinedTextField(
+                    value = searchEpisodeTitle,
+                    onValueChange = episodeViewModel::onSearchTextChange,
+
+                    colors = androidx.compose.material3.TextFieldDefaults.outlinedTextFieldColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        cursorColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.secondary,
+                        textColor = MaterialTheme.colorScheme.onBackground
+                    ),
+                    placeholder = {
+                        Text(
+                            text = "Search title...",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
+                    shape = RoundedCornerShape(12),
+                    singleLine = true,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 15.dp)
+                )
+            }
+        }
+
     }
 }
 
 @Composable
-fun ScaffoldBottomBar(mainViewModel: MainViewModel) {
+fun ScaffoldBottomBar(episodeViewModel: EpisodeViewModel, scope: CoroutineScope) {
 
     BottomAppBar(
         modifier = Modifier
@@ -258,7 +326,7 @@ fun ScaffoldBottomBar(mainViewModel: MainViewModel) {
                     modifier = Modifier
                         .size(60.dp)
                         .clip(CircleShape),
-                    onClick = { /*TODO*/ }
+                    onClick = { /*Se refresca la base de datos de capitulos para obtener nuevos*/ }
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Refresh,
@@ -268,7 +336,11 @@ fun ScaffoldBottomBar(mainViewModel: MainViewModel) {
                     )
                 }
 
-                IconButton(modifier = Modifier.size(60.dp), onClick = { /*TODO*/ }) {
+                IconButton(modifier = Modifier.size(60.dp), onClick = {
+                    scope.launch {
+                        episodeViewModel.checkWatchEpisode()
+                    }
+                }) {
                     Icon(
                         imageVector = Icons.Filled.CheckCircle,
                         contentDescription = "Check icon",

@@ -1,7 +1,6 @@
 package com.yama.ui.screen.episodes.ui
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -40,7 +39,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -59,6 +57,7 @@ import com.yama.domain.classes.Episode
 import com.yama.ui.scaffold.ScaffoldBottomBar
 import com.yama.ui.scaffold.ScaffoldSearchTopBar
 import com.yama.ui.scaffold.ScaffoldTopBar
+import com.yama.ui.screen.episodes.EpisodeViewModel
 import com.yama.ui.screen.viewmodel.MainViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -67,13 +66,15 @@ import kotlinx.coroutines.launch
 fun EpisodesContentView(
     context: Context,
     mainViewModel: MainViewModel,
-    navController: NavController
+    navController: NavController,
+    episodeViewModel: EpisodeViewModel
 ) {
 
+    episodeViewModel.getEpisodes(mainViewModel.getAnime())
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
-    val isClicked by mainViewModel.isClicked.collectAsState()
-    val isPressed by mainViewModel.isBottomBarActive.collectAsState()
+    val isClicked by episodeViewModel.isClicked.collectAsState()
+    val isPressed by episodeViewModel.isBottomBarActive.collectAsState()
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -87,6 +88,7 @@ fun EpisodesContentView(
                     scaffoldState = scaffoldState,
                     scope = scope,
                     mainViewModel = mainViewModel,
+                    episodeViewModel = episodeViewModel,
                     navController = navController
                 )
             }
@@ -97,7 +99,8 @@ fun EpisodesContentView(
             ) {
                 ScaffoldSearchTopBar(
                     scope = scope,
-                    mainViewModel = mainViewModel
+                    mainViewModel = mainViewModel,
+                    episodeViewModel = episodeViewModel
                 )
             }
         },
@@ -107,7 +110,7 @@ fun EpisodesContentView(
                 enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
                 exit = fadeOut() + slideOutVertically(targetOffsetY = { it })
             ) {
-                ScaffoldBottomBar(mainViewModel = mainViewModel)
+                ScaffoldBottomBar(episodeViewModel = episodeViewModel, scope = scope)
             }
         },
         backgroundColor = MaterialTheme.colorScheme.background,
@@ -121,7 +124,7 @@ fun EpisodesContentView(
         ) {
             Column {
                 CenterEpisodesBox(
-                    mainViewModel = mainViewModel,
+                    episodeViewModel = episodeViewModel,
                     navController = navController,
                     scope = scope
                 )
@@ -133,7 +136,7 @@ fun EpisodesContentView(
 
 @Composable
 fun CenterEpisodesBox(
-    mainViewModel: MainViewModel,
+    episodeViewModel: EpisodeViewModel,
     navController: NavController,
     scope: CoroutineScope
 ) {
@@ -147,19 +150,23 @@ fun CenterEpisodesBox(
             .fillMaxSize(),
         verticalArrangement = Arrangement.Center
     ) {
-        RecyclerViewEpisodes(mainViewModel, navController = navController, scope = scope)
+        RecyclerViewEpisodes(
+            episodeViewModel = episodeViewModel,
+            navController = navController,
+            scope = scope
+        )
     }
 
 }
 
 @Composable
 fun RecyclerViewEpisodes(
-    mainViewModel: MainViewModel,
     navController: NavController,
-    scope: CoroutineScope
+    scope: CoroutineScope,
+    episodeViewModel: EpisodeViewModel
 ) {
 
-    val episodes by mainViewModel.episode.collectAsState()
+    val episodes by episodeViewModel.episode.collectAsState()
 
     if (episodes.isEmpty()) {
         Column(
@@ -199,7 +206,7 @@ fun RecyclerViewEpisodes(
                 EpisodeCard(
                     item = item,
                     navController = navController,
-                    mainViewModel = mainViewModel,
+                    episodeViewModel = episodeViewModel,
                     scope = scope,
                     index = index
                 )
@@ -214,11 +221,13 @@ fun RecyclerViewEpisodes(
 fun EpisodeCard(
     item: Episode,
     navController: NavController,
-    mainViewModel: MainViewModel,
     scope: CoroutineScope,
-    index: Int
+    index: Int,
+    episodeViewModel: EpisodeViewModel
 ) {
+
     var isSelected by rememberSaveable { mutableStateOf(item.isSelected) }
+
 
     AnimatedContent(targetState = isSelected, label = "", content = {
 
@@ -241,11 +250,10 @@ fun EpisodeCard(
                         onLongClick = {
                             scope.launch {
 
-                                mainViewModel.activeBottomBar()
-                                mainViewModel.episodeSelected(index)
+                                episodeViewModel.activeBottomBar()
+                                episodeViewModel.episodeSelected(index)
+                                episodeViewModel.bottombarCheck()
                                 isSelected = !isSelected
-                                mainViewModel.bottombarCheck()
-                                Log.d("INDEX", "$index")
                             }
                         })
 
@@ -256,7 +264,12 @@ fun EpisodeCard(
                     modifier = Modifier
                         .align(alignment = Alignment.Center)
                         .fillMaxWidth(),
-                    contentScale = ContentScale.FillWidth
+                    contentScale = ContentScale.FillWidth,
+                    colorFilter = if (item.watched) ColorFilter.colorMatrix(ColorMatrix().apply {
+                        setToSaturation(
+                            0f
+                        )
+                    }) else ColorFilter.colorMatrix(ColorMatrix().apply { })
                 )
                 Column(
                     Modifier
@@ -294,11 +307,10 @@ fun EpisodeCard(
                         onLongClick = {
                             scope.launch {
 
-                                mainViewModel.activeBottomBar()
-                                mainViewModel.episodeSelected(index)
+                                episodeViewModel.activeBottomBar()
+                                episodeViewModel.episodeSelected(index)
+                                episodeViewModel.bottombarCheck()
                                 isSelected = !isSelected
-                                mainViewModel.bottombarCheck()
-                                Log.d("INDEX", "$index")
                             }
                         })
 
@@ -310,11 +322,11 @@ fun EpisodeCard(
                         .align(alignment = Alignment.Center)
                         .fillMaxWidth(),
                     contentScale = ContentScale.FillWidth,
-                    colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply {
+                    colorFilter = if (item.watched) ColorFilter.colorMatrix(ColorMatrix().apply {
                         setToSaturation(
                             0f
                         )
-                    })
+                    }) else ColorFilter.colorMatrix(ColorMatrix().apply { })
                 )
                 Column(
                     Modifier

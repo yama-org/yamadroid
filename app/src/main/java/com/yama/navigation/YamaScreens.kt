@@ -6,7 +6,7 @@ sealed class YamaScreens(val route:String) {
     object Episodes:YamaScreens("episodes")
     object Information:YamaScreens("information")
     object Settings:YamaScreens("settings")
-    object About:YamaScreens("About")
+    object About:YamaScreens("about")
 
 
 }
