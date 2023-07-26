@@ -101,7 +101,7 @@ fun HomeContentView(
                 .padding(it)
                 .padding(start = 2.5.dp, end = 2.5.dp, top = 10.dp, bottom = 2.dp)
         ) {
-            Column() {
+            Column {
                 CenterTitlesBox(mainViewModel = mainViewModel, navController = navController)
             }
         }
