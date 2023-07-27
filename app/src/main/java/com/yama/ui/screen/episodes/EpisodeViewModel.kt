@@ -1,12 +1,9 @@
 package com.yama.ui.screen.episodes
 
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yama.domain.classes.Anime
 import com.yama.domain.classes.Episode
-import com.yama.ui.screen.viewmodel.MainViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -76,6 +73,7 @@ class EpisodeViewModel @Inject constructor() : ViewModel() {
         return _episodes.value.filter { it.isSelected }
     }
 
+
     fun bottombarCheck() {
 
         if (getEpisodesSelected().isEmpty()) {
@@ -99,7 +97,9 @@ class EpisodeViewModel @Inject constructor() : ViewModel() {
         bottombarCheck()
     }
 
-    fun episodeSelected(index: Int) {
+    fun episodeSelected(index: Int) : Boolean {
         _episodes.value[index].isSelected = !_episodes.value[index].isSelected
+
+        return _episodes.value[index].isSelected
     }
 }

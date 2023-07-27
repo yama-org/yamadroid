@@ -1,6 +1,7 @@
 package com.yama.ui.screen.episodes.ui
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -74,7 +75,7 @@ fun EpisodesContentView(
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
     val isClicked by episodeViewModel.isClicked.collectAsState()
-    val isPressed by episodeViewModel.isBottomBarActive.collectAsState()
+    val isBottomBarActive by episodeViewModel.isBottomBarActive.collectAsState()
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -106,7 +107,7 @@ fun EpisodesContentView(
         },
         bottomBar = {
             AnimatedVisibility(
-                visible = isPressed,
+                visible = isBottomBarActive,
                 enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
                 exit = fadeOut() + slideOutVertically(targetOffsetY = { it })
             ) {
@@ -216,7 +217,9 @@ fun RecyclerViewEpisodes(
 
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
+@OptIn(
+    ExperimentalFoundationApi::class, ExperimentalAnimationApi::class
+)
 @Composable
 fun EpisodeCard(
     item: Episode,
@@ -251,9 +254,8 @@ fun EpisodeCard(
                             scope.launch {
 
                                 episodeViewModel.activeBottomBar()
-                                episodeViewModel.episodeSelected(index)
+                                isSelected = episodeViewModel.episodeSelected(index)
                                 episodeViewModel.bottombarCheck()
-                                isSelected = !isSelected
                             }
                         })
 
@@ -311,6 +313,7 @@ fun EpisodeCard(
                                 episodeViewModel.episodeSelected(index)
                                 episodeViewModel.bottombarCheck()
                                 isSelected = !isSelected
+
                             }
                         })
 
