@@ -8,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import com.yama.ui.screen.episodes.EpisodeViewModel
 import com.yama.ui.screen.episodes.ui.EpisodesContentView
 import com.yama.ui.screen.home.ui.HomeContentView
+import com.yama.ui.screen.information.ui.InformationContentView
 import com.yama.ui.screen.viewmodel.MainViewModel
 
 @Composable
@@ -43,7 +44,12 @@ fun AppNavigation(
 
         composable(route = YamaScreens.Information.route) {
             mainViewModel.screenUbication = "Information"
-            /*Information.kt*/
+            InformationContentView(
+                context = context,
+                mainViewModel = mainViewModel,
+                episodeViewModel = episodeViewModel,
+                navController = navController
+            )
         }
 
         composable(route = YamaScreens.Settings.route) {

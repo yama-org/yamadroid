@@ -64,9 +64,11 @@ fun ScaffoldTopBar(
         modifier = Modifier.padding(top = 10.dp, start = 5.dp, end = 5.dp),
         title = {
             Text(
-                text = mainViewModel.screenUbication,
+                text = if (mainViewModel.screenUbication == "Information") mainViewModel.getAnime().title else mainViewModel.screenUbication,
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.onPrimary,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
             )
 
         },
@@ -109,6 +111,23 @@ fun ScaffoldTopBar(
                         )
                     }
                 }
+
+                "Information" -> {
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                navController.navigate(YamaScreens.Episodes.route)
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Back icon",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(35.dp)
+                        )
+                    }
+                }
             }
 
         },
@@ -133,7 +152,13 @@ fun ScaffoldTopBar(
 
                 "Episodes" -> {
 
-                    IconButton(onClick = { /*Navegacion a informacion de la serie*/ }) {
+                    IconButton(onClick = {
+
+                        episodeViewModel.emptyEpisodesSelected()
+                        episodeViewModel.bottombarCheck()
+                        navController.navigate(YamaScreens.Information.route)
+
+                    }) {
                         Icon(
                             imageVector = Icons.Filled.Info,
                             contentDescription = "Info Icon",

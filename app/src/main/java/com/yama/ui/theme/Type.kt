@@ -35,6 +35,12 @@ val Typography = Typography(
         fontWeight = FontWeight.Light,
         fontSize = 18.sp,
         color = Color(R.color.colorText)
+    ),
+    headlineLarge = TextStyle(
+        fontFamily = YamaFont,
+        fontWeight = FontWeight.Medium,
+        fontSize = 26.sp,
+        color = Color(R.color.white)
     )
 )
 
